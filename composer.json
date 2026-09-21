@@ -10,6 +10,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.4",
+        "laravel/ai": "1.x-dev#3f1c8626906dce3a06933d1c9f9c9f86b850be5f",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0"
     },

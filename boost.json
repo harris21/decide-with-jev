@@ -13,6 +13,7 @@
     "skills": [
         "infer-conventions",
         "deploying-to-cloud",
+        "ai-sdk-development",
         "laravel-best-practices",
         "testing-best-practices",
         "tailwindcss-development"

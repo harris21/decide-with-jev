@@ -14,5 +14,8 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/preflight', [PreflightController::class, 'show']);
+    Route::get('/preflight', [PreflightController::class, 'show'])->block(60, 60);
+    Route::post('/preflight/draft', [PreflightController::class, 'save'])->block(60, 60);
+    Route::post('/preflight/check', [PreflightController::class, 'check'])->block(60, 60);
+    Route::post('/preflight/decision', [PreflightController::class, 'decide'])->block(60, 60);
 });

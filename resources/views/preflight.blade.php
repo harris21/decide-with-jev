@@ -34,7 +34,31 @@
                 data-recommendation="{{ $run['recommendation'] ?? 'none' }}"
                 data-status="{{ $run['status'] ?? 'none' }}"
                 data-current="{{ ($current ?? false) ? 'yes' : 'no' }}">
-                {{-- Episode 4 result panel goes here. --}}
+                @if ($run)
+                    <h2>{{ $current ? 'Current check' : 'Stale check. Run again.' }}</h2>
+                    <p>Machine recommendation: {{ $run['recommendation'] }}</p>
+                    <p>Run status: {{ $run['status'] }}</p>
+                    <pre>{{ json_encode($run['answers'], JSON_PRETTY_PRINT) }}</pre>
+                    @if ($current)
+                        <form method="POST" action="/preflight/decision">
+                            @csrf
+                            <input type="hidden" name="run_id" value="{{ $run['id'] }}">
+                            <label>Decision
+                                <select name="decision">
+                                    <option value="accept-for-editing">Accept for editing</option>
+                                    <option value="revise">Revise</option>
+                                    <option value="needs-review">Needs review</option>
+                                </select>
+                            </label>
+                            <label>Reason <input name="reason" required maxlength="500"></label>
+                            <button>Save editor decision</button>
+                        </form>
+                    @endif
+                    @if ($run['human'])
+                        <p>Editor decision: {{ $run['human']['decision'] }}</p>
+                        <p>{{ $run['human']['reason'] }}</p>
+                    @endif
+                @endif
             </section>
         </section>
     </div>

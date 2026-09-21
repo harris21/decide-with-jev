@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/Users/harrisrafto/Library/Application Support/Herd/bin/php83",
+            "args": [
+                "/Users/harrisrafto/code/content-preflight-checker/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}

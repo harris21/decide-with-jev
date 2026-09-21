@@ -1,58 +1,75 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Content Preflight Checker
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The app from the Laravel News course on TypeSafe AI's Jev model and the Laravel AI SDK.
 
-## About Laravel
+You give it a brief and a short tutorial draft. It asks Jev three questions: does the draft deliver what the brief promised, what format is it, and how clear are the steps. PHP turns those answers into one of three recommendations: `ready-for-editor`, `revise` or `needs-review`. A person makes the final call. Nothing is published.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+It does not write articles, check facts or run the code in a draft.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## One branch per episode
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Branch | What it holds |
+|---|---|
+| `starter` | A fresh Laravel 13 app with a basic sign in, the editor permission and the empty review screen. No starter kit and no AI SDK yet. |
+| `episode-1` | The Laravel AI SDK, the Jev provider config, sample texts and the first Boolean question |
+| `episode-2` | The `CheckContent` service with Boolean, Choice and Score questions |
+| `episode-3` | The `PreflightPolicy` rules |
+| `episode-4` | The review screen: saved runs, stale checks and the editor's decision |
+| `episode-5` | Input limits, a timeout and a safe failure path |
+| `episode-6` | Policy tests with fakes and the labelled evaluation sheet |
 
-## Learning Laravel
+Each branch is the finished code for that episode. To follow along with an episode, start from the branch before it.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## What you need
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.4 or newer
+- Composer
+- Node.js and npm
+- A TypeSafe AI account and API key, for the real model calls. The tests use fakes and need no key.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Set up
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repository-url> content-preflight-checker
+cd content-preflight-checker
+git checkout starter
+composer setup
+php artisan db:seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+`composer setup` installs the PHP and JavaScript packages, creates `.env`, makes the SQLite database, runs the migrations and builds the assets.
 
-## Contributing
+From `episode-1` on, open `.env` and add your key:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```dotenv
+TYPESAFE_API_KEY=your-server-side-key
+```
 
-## Code of Conduct
+Keep that key on the server. Do not commit it and do not put it in JavaScript.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Start the app with `composer dev`, or point Laravel Herd or Valet at the folder.
 
-## Security Vulnerabilities
+## Sign in
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Email | Password | Role |
+|---|---|---|
+| `editor@example.com` | `password` | Editor. Can use the review screen. |
+| `writer@example.com` | `password` | Not an editor. Gets a 403. |
 
-## License
+These accounts are for local use only.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Run the tests
+
+```bash
+php artisan test
+```
+
+The tests never call the live model.
+
+## About the SDK version
+
+The classification feature is not in a tagged Laravel AI SDK release yet. This project locks `laravel/ai` to one commit on the `1.x` branch. Treat it as a preview. When a tagged release includes classification, update the package and check every snippet again.
+
+## Real model calls cost money
+
+Each check sends your brief and draft to TypeSafe's hosted service. Use made-up text like the samples in `resources/preflight/samples.php`, not private drafts.

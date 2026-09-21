@@ -1,9 +1,396 @@
-@import 'tailwindcss';
+/*
+ * Content Preflight Checker: a proof sheet on a prepress desk.
+ * The Blade views stay plain semantic HTML; the look lives here.
+ * Process inks carry meaning: cyan = ready-for-editor, magenta = revise,
+ * yellow = needs-review, key = stale.
+ */
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+:root {
+    --desk: #e4eaf2;
+    --sheet: #fbfcfe;
+    --ink: #1d2f8f;
+    --ink-soft: #5664ad;
+    --guide: #9dd9f3;
+    --wash: #eef2fb;
+    --cyan: #0096d6;
+    --magenta: #d4136f;
+    --yellow: #ffd500;
+    --key: #20242c;
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --display: 'Bricolage Grotesque', 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+    --trim: 1.75rem;
+    --mark: 1.125rem;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 106.25%;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 1.5rem 1rem 4rem;
+    background: var(--desk);
+    color: var(--ink);
+    font-family: var(--display);
+    line-height: 1.5;
+}
+
+/* Slug line: sits outside the trim, like job info on a printed proof. */
+
+body > header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.5rem;
+    max-width: 76rem;
+    margin: 0 auto;
+    padding: 0 var(--trim);
+    font-size: 0.875rem;
+}
+
+body > header strong {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+body > header form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 0 auto;
+}
+
+body > header button {
+    padding: 0.25rem 0.75rem;
+    background: transparent;
+    color: var(--ink);
+    font-size: inherit;
+}
+
+body > header button:hover {
+    background: var(--ink);
+    color: var(--sheet);
+}
+
+/* Control strip: the key to what each ink means on this sheet. */
+
+.strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.strip li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.strip li::before {
+    content: '';
+    width: 0.875rem;
+    height: 0.875rem;
+    background: var(--swatch);
+}
+
+.strip li:nth-child(1) { --swatch: var(--cyan); }
+.strip li:nth-child(2) { --swatch: var(--magenta); }
+.strip li:nth-child(3) { --swatch: var(--yellow); }
+.strip li:nth-child(4) { --swatch: var(--key); }
+
+/* The sheet, with crop marks drawn in the trim area around it. */
+
+main {
+    --m: linear-gradient(var(--ink), var(--ink)) no-repeat;
+    max-width: 76rem;
+    margin: 0.75rem auto 0;
+    padding: var(--trim);
+    background:
+        var(--m) var(--trim) 0 / 1px var(--mark),
+        var(--m) 0 var(--trim) / var(--mark) 1px,
+        var(--m) calc(100% - var(--trim)) 0 / 1px var(--mark),
+        var(--m) 100% var(--trim) / var(--mark) 1px,
+        var(--m) var(--trim) 100% / 1px var(--mark),
+        var(--m) 0 calc(100% - var(--trim)) / var(--mark) 1px,
+        var(--m) calc(100% - var(--trim)) 100% / 1px var(--mark),
+        var(--m) 100% calc(100% - var(--trim)) / var(--mark) 1px;
+}
+
+main > article {
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+    background: var(--sheet);
+}
+
+main.narrow {
+    max-width: 34rem;
+}
+
+main.narrow form {
+    margin-top: 2rem;
+}
+
+h1 {
+    max-width: 14ch;
+    margin: 0 0 1rem;
+    font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+    font-weight: 800;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+}
+
+h2 {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+p {
+    max-width: 62ch;
+    margin: 0 0 1rem;
+}
+
+h1 + p {
+    font-size: 1.125rem;
+    color: var(--ink-soft);
+}
+
+/* Two columns on a wide desk: the draft on the left, the check on the right. */
+
+.columns {
+    display: grid;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--guide);
+}
+
+@media (min-width: 60rem) {
+    .columns {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        gap: 4rem;
+    }
+}
+
+/* Forms */
+
+form {
+    margin: 0 0 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 1.25rem;
+    font-weight: 600;
+}
+
+label.inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 400;
+}
+
+input,
+select,
+textarea {
+    display: block;
+    width: 100%;
+    margin-top: 0.4rem;
+    padding: 0.7rem 0.8rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--key);
+    font: inherit;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+input[type='checkbox'] {
+    display: inline-block;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    accent-color: var(--ink);
+}
+
+input[type='hidden'] {
+    display: none;
+}
+
+a {
+    color: var(--ink);
+    font-weight: 600;
+    text-underline-offset: 0.2em;
+}
+
+textarea {
+    min-height: 16rem;
+    resize: vertical;
+}
+
+textarea[name='brief'] {
+    min-height: 6.5rem;
+}
+
+button {
+    padding: 0.75rem 1.25rem;
+    border: 1.5px solid var(--ink);
+    border-radius: 3px;
+    background: var(--ink);
+    color: var(--sheet);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--key);
+    border-color: var(--key);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+form[action$='/draft'] button {
+    background: transparent;
+    color: var(--ink);
+}
+
+form[action$='/draft'] button:hover {
+    background: var(--wash);
+    border-color: var(--ink);
+}
+
+:focus-visible {
+    outline: 3px solid var(--magenta);
+    outline-offset: 2px;
+}
+
+/* Validation errors: say what is wrong, in magenta, the correction ink. */
+
+.errors {
+    max-width: 62ch;
+    margin: 1.5rem 0 0;
+    padding: 0.9rem 1.1rem 0.9rem 2.2rem;
+    border-left: 6px solid var(--magenta);
+    background: #fdeef5;
+    color: var(--key);
+}
+
+/* Result panel. The prewritten shell sets the data attributes; the panel
+   itself is the plain markup added in episode 4. */
+
+.result {
+    --state: var(--key);
+    --on-state: #fff;
+    padding-left: 1.25rem;
+    border-left: 6px solid var(--state);
+}
+
+.result:empty,
+.result:not(:has(*)) {
+    display: none;
+}
+
+.result[data-recommendation='ready-for-editor'] {
+    --state: var(--cyan);
+    --on-state: var(--key);
+}
+
+.result[data-recommendation='revise'] {
+    --state: var(--magenta);
+    --on-state: #fff;
+}
+
+.result[data-recommendation='needs-review'] {
+    --state: var(--yellow);
+    --on-state: var(--key);
+}
+
+.result[data-current='no'] {
+    --state: var(--key);
+    --on-state: #fff;
+}
+
+/* The machine recommendation prints as a proof stamp in its process ink. */
+
+.result h2 + p {
+    display: inline-block;
+    margin: 0.25rem 0 1.25rem;
+    padding: 0.55rem 0.95rem;
+    background: var(--state);
+    color: var(--on-state);
+    font-size: 1.0625rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    transform: rotate(-1.5deg);
+    transform-origin: left center;
+}
+
+.result[data-current='no'] h2 + p {
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+}
+
+.result[data-status='failed'] h2 + p + p {
+    color: var(--magenta);
+    font-weight: 800;
+}
+
+pre {
+    max-height: 22rem;
+    margin: 0 0 1.5rem;
+    padding: 1rem;
+    overflow: auto;
+    background: var(--wash);
+    color: var(--key);
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    tab-size: 2;
+}
+
+.result form {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--guide);
+}
+
+/* The editor's decision follows the form on a current run and the answers
+   on a stale one, where it stays on the sheet as evidence. */
+
+.result pre ~ p {
+    margin-bottom: 0.35rem;
+}
+
+.result form + p,
+.result pre + p {
+    font-weight: 800;
+}
+
+.result pre + p {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--guide);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button:active {
+        transform: none;
+    }
 }

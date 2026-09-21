@@ -6,6 +6,15 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "playwright": {
+            "command": "npx",
+            "args": [
+                "@playwright/mcp",
+                "--browser",
+                "chrome",
+                "--ignore-https-errors"
+            ]
         }
     }
 }

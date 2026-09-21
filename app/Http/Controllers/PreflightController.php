@@ -7,8 +7,10 @@ use App\Services\PreflightPolicy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Throwable;
 
 final class PreflightController extends Controller
 {
@@ -25,7 +27,10 @@ final class PreflightController extends Controller
     public function save(Request $request): RedirectResponse
     {
         Gate::authorize('edit-preflight');
-        $data = $request->validate(['brief' => ['required', 'string'], 'draft' => ['required', 'string']]);
+        $data = $request->validate([
+            'brief' => ['required', 'string', 'max:1000'],
+            'draft' => ['required', 'string', 'max:12000'],
+        ]);
         $old = $request->session()->get('preflight.draft');
         $request->session()->put('preflight.draft', [
             ...$data, 'version' => ($old['version'] ?? 0) + 1,
@@ -39,22 +44,41 @@ final class PreflightController extends Controller
         Gate::authorize('edit-preflight');
         $draft = $request->session()->get('preflight.draft');
         abort_unless($draft, 422, 'Save a draft first.');
-        $response = $checker->check($draft['brief'], $draft['draft']);
-        $request->session()->put('preflight.run', [
+        validator($draft, [
+            'brief' => ['required', 'string', 'max:1000'],
+            'draft' => ['required', 'string', 'max:12000'],
+        ])->validate();
+
+        $run = [
             'id' => (string) Str::uuid(),
             'input_version' => $draft['version'],
             'input_hash' => $this->fingerprint($draft),
             'input' => $draft,
             'requested_model' => CheckContent::MODEL,
-            'returned_model' => $response->meta->model,
-            'provider' => $response->meta->provider,
+            'returned_model' => null, 'provider' => 'typesafe',
             'rubric' => CheckContent::RUBRIC,
             'policy' => PreflightPolicy::VERSION,
-            'answers' => array_map(fn ($answer) => $answer->toArray(), $response->answers),
-            'recommendation' => $policy->recommend($response),
-            'status' => 'ok', 'checked_at' => now()->toIso8601String(),
+            'answers' => [], 'recommendation' => 'needs-review',
+            'status' => 'failed', 'checked_at' => now()->toIso8601String(),
             'human' => null,
-        ]);
+        ];
+
+        try {
+            $response = $checker->check($draft['brief'], $draft['draft']);
+            $run['answers'] = array_map(fn ($answer) => $answer->toArray(), $response->answers);
+            $run['returned_model'] = $response->meta->model;
+            $run['provider'] = $response->meta->provider;
+            $run['recommendation'] = $policy->recommend($response);
+            $run['status'] = 'ok';
+        } catch (Throwable $error) {
+            $run['answers'] = [];
+            $run['recommendation'] = 'needs-review';
+            Log::warning('Preflight request failed', [
+                'run_id' => $run['id'], 'error_class' => $error::class,
+            ]);
+        }
+
+        $request->session()->put('preflight.run', $run);
 
         return redirect('/preflight');
     }

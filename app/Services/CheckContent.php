@@ -42,6 +42,7 @@ final class CheckContent
                     self::LEVELS,
                 ),
             ])
+            ->timeout(15)
             ->classify(provider: 'typesafe', model: self::MODEL);
     }
 }

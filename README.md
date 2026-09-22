@@ -1,6 +1,6 @@
-# Content Preflight Checker
+# Decide with Jev
 
-The app from the Laravel News course on TypeSafe AI's Jev model and the Laravel AI SDK.
+The app from the Laravel News course on AI decisions in Laravel with TypeSafe AI's Jev model and the Laravel AI SDK. The app is a content preflight checker.
 
 You give it a brief and a short tutorial draft. It asks Jev three questions: does the draft deliver what the brief promised, what format is it, and how clear are the steps. PHP turns those answers into one of three recommendations: `ready-for-editor`, `revise` or `needs-review`. A person makes the final call. Nothing is published.
 
@@ -30,8 +30,8 @@ Each branch is the finished code for that episode. To follow along with an episo
 ## Set up
 
 ```bash
-git clone <repository-url> content-preflight-checker
-cd content-preflight-checker
+git clone https://github.com/harris21/decide-with-jev.git
+cd decide-with-jev
 git checkout starter
 composer setup
 php artisan db:seed
